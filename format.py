@@ -160,7 +160,6 @@ if len(unformatted_data) != 0:
 
         print('\n' + Fore.GREEN + 'SUCCESS!\n' + Fore.RESET)
 
-
     # ----------- deleting used files ---------------------
 
     print(Fore.GREEN)
