@@ -9,7 +9,10 @@ def print_none():
     print(Fore.RED + 'NONE!!!' + Fore.RESET)
 
 
-def print_question(test, number):
+def print_question(test, number, highlight=False):
+    if highlight:
+        print(Fore.MAGENTA)
+
     print(str(number), ".\nQuestion: ", sep='', end='')
 
     if test[str(number)][0] != '':
@@ -20,15 +23,22 @@ def print_question(test, number):
     else:
         print_none()
 
-    print("\nAnswer: ", end='')
-
-    if test[str(number)][0] != '':
-        try:
-            print(test[str(number)][1], end='')
-        except:
-            print_none()
+    print("\nAnswers: ")
+    if len(test[str(number)]) > 1:
+        for i in range(1, len(test[str(number)])):
+            if test[str(number)][i] != '':
+                try:
+                    print(f"{i}: {test[str(number)][i]}")
+                except:
+                    print_none()
+            else:
+                print_none()
     else:
         print_none()
+        print("\n")
+
+    if highlight:
+        print(Fore.RESET)
 
     print("\n")
 
@@ -96,7 +106,9 @@ if len(unformatted_data) != 0:
         print(Fore.MAGENTA)
         print(filename, '\n')
         print(Fore.RESET)
-        print(f"Here is an example:\nQuestion: {unformatted_test['3'][0]}\nAnswer: {unformatted_test['3'][1]}\n\nChoose the question type:\n1 - One blank field with different possible answers.\n2 - Several blank fields with one answer variant.\n3 - Do not include this test\n4 - Stop the programm\n")
+        print(f"Here is an example:\nQuestion: {unformatted_test['3'][0]}\nAnswer: {unformatted_test['3'][1]}\n"
+              f"\nChoose the question type:\n1 - One blank field with different possible answers.\n2 - Several blank "
+              f"fields with one answer variant.\n3 - Do not include this test\n4 - Stop the program\n")
         question_type = int(input("Enter 1 or 2 or 3 or 4: "))
 
         if question_type == 4:
@@ -109,20 +121,25 @@ if len(unformatted_data) != 0:
                 question_type = "missing_words"
 
             print_test(unformatted_test)
-            ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next test\n4: try to autocorrect\nFill the blank: "))
+            ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next "
+                           "test\n4: try to autocorrect\nFill the blank: "))
 
             if ok == 4:
                 unformatted_test = autocorrect(unformatted_test)
                 print_test(unformatted_test)
-                ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next test\nFill the blank: "))
+                ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next "
+                               "test\nFill the blank: "))
 
             if ok != 3:
                 while ok != 1:
+                    if ok == 3:
+                        break
                     incorrect_number = input("Enter the question number, which is incorrect: ")
-                    print_question(unformatted_test, incorrect_number)
-                    incorrect_option = input("Enter the option:\n1 - Change question.\n2 - Change answer.\n\nLeave the field blank to go back: ")
+                    print_question(unformatted_test, incorrect_number, True)
+                    incorrect_option = input("Enter the option:\n1 - Change question.\n2 - Change answer.\n3 - Add "
+                                             "answer\n\nLeave the field blank to go back: ")
 
-                    while incorrect_option == "1" or incorrect_option == "2":
+                    while incorrect_option == "1" or incorrect_option == "2" or incorrect_option == "3":
 
                         if incorrect_option == "1":
                             question = input("Enter new question: ")
@@ -132,17 +149,30 @@ if len(unformatted_data) != 0:
                                 unformatted_test[incorrect_number].append(question)
 
                         elif incorrect_option == "2":
+                            len_answers = len(unformatted_test[incorrect_number]) - 1
+                            answer_num = 1
+                            if len_answers > 1:
+                                for i in range(1, len_answers + 1):
+                                    print(f"{i}: {unformatted_test[incorrect_number][i]}")
+                                answer_num = int(input("Enter which answer you want to change: "))
+
                             answer = input("Enter new answer: ")
                             try:
-                                unformatted_test[incorrect_number][1] = answer
+                                unformatted_test[incorrect_number][answer_num] = answer
                             except:
                                 unformatted_test[incorrect_number].append(answer)
 
-                        print_question(unformatted_test, incorrect_number)
-                        incorrect_option = input("Enter the option:\n1 - Change question.\n2 - Change answer.\n\nLeave the field blank to go back: ")
+                        elif incorrect_option == "3":
+                            answer = input("Enter new answer: ")
+                            unformatted_test[incorrect_number].append(answer)
+
+                        print_question(unformatted_test, incorrect_number, True)
+                        incorrect_option = input("Enter the option:\n1 - Change question.\n2 - Change answer.\n3 - "
+                                                 "Add answer\n\nLeave the field blank to go back: ")
 
                     print_test(unformatted_test)
-                    ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next test\n4: try to autocorrect\nFill the blank: "))
+                    ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the "
+                                   "next test\n4: try to autocorrect\nFill the blank: "))
 
                 name = input("\nEnter the name: ")
                 task = input("\nEnter the task / question: ")
@@ -176,9 +206,11 @@ if len(unformatted_data) != 0:
                     formatted_question['theme'] = theme
                     formatted_question['type'] = question_type
                     formatted_question['variants'] = []
-                    formatted_question['right_answers'] = [unformatted_question[1]]
                     formatted_question['score'] = score
                     formatted_question['image'] = 0
+                    formatted_question['right_answers'] = []
+                    for i in range(1, len(unformatted_question)):
+                        formatted_question['right_answers'].append(unformatted_question[i])
 
                     questions.append(formatted_question)
                     with open("questions.json", "r+") as update_question_list_file:
@@ -204,10 +236,14 @@ if len(unformatted_data) != 0:
     print(Fore.GREEN)
 
     for filename in delete_files:
-        unformatted_data.pop(filename)
-        remove("files/" + filename)
-        print(f"Successfully deleted unformatted data and file files/{filename}")
-
+        try:
+            unformatted_data.pop(filename)
+            remove("files/" + filename)
+            print(f"Successfully deleted unformatted data and file files/{filename}")
+        except:
+            print(Fore.RED)
+            print(f"ERROR deleting {filename}")
+            print(Fore.GREEN)
 
     with open("unformatted_data.json", "r+") as update_data_file:
         update_data_file.write(dumps(unformatted_data))
