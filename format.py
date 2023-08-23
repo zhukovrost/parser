@@ -5,22 +5,30 @@ from os import remove
 # --------- functions ------------
 
 
+def print_none():
+    print(Fore.RED + 'NONE!!!' + Fore.RESET)
+
+
 def print_question(test, number):
     print(str(number), ".\nQuestion: ", sep='', end='')
 
-    try:
-        print(test[str(number)][0], end='')
-    except:
-        print(Fore.RED + "NONE!!!")
-        print(Fore.RESET)
+    if test[str(number)][0] != '':
+        try:
+            print(test[str(number)][0], end='')
+        except:
+            print_none()
+    else:
+        print_none()
 
     print("\nAnswer: ", end='')
 
-    try:
-        print(test[str(number)][1], end='')
-    except:
-        print(Fore.RED + 'NONE!!!')
-        print(Fore.RESET)
+    if test[str(number)][0] != '':
+        try:
+            print(test[str(number)][1], end='')
+        except:
+            print_none()
+    else:
+        print_none()
 
     print("\n")
 
@@ -32,6 +40,31 @@ def print_test(test):
         print_question(test, i)
 
     print('\n')
+
+
+def autocorrect(unformatted_test):
+    correct_test = {}
+    for i in range(1, len(unformatted_test)):
+        item_question = ''
+        item_answer = ''
+        try:
+            item = unformatted_test[str(i)]
+            if item[0] is not None and item[1] is not None:
+                item_question = item[0]
+                j = 0
+                while j <= len(item[0]) and item[0][j] == item[1][j]:
+                    j += 1
+
+                if j != 0:
+                    while j <= len(item[1]) and item[1][j] != ' ' and item[1][j] != '.' and item[1][j] != '!' and item[1][j] != '?' and item[1][j] != '(':
+                        item_answer += item[1][j]
+                        j += 1
+        except:
+            print(Fore.RED + 'ERROR READING ELEMENT NUMBER ' + str(i) + '!!!' + Fore.RESET)
+
+        correct_test[str(i)] = [item_question, item_answer]
+
+    return correct_test
 
 
 # ------------ importing dat from files ---------------
@@ -76,7 +109,13 @@ if len(unformatted_data) != 0:
                 question_type = "missing_words"
 
             print_test(unformatted_test)
-            ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next test\nFill the blank: "))
+            ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next test\n4: try to autocorrect\nFill the blank: "))
+
+            if ok == 4:
+                unformatted_test = autocorrect(unformatted_test)
+                print_test(unformatted_test)
+                ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next test\nFill the blank: "))
+
             if ok != 3:
                 while ok != 1:
                     incorrect_number = input("Enter the question number, which is incorrect: ")
@@ -103,7 +142,7 @@ if len(unformatted_data) != 0:
                         incorrect_option = input("Enter the option:\n1 - Change question.\n2 - Change answer.\n\nLeave the field blank to go back: ")
 
                     print_test(unformatted_test)
-                    ok = int(input("Is this test correct? 0 - no, 1 - yes: "))
+                    ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next test\n4: try to autocorrect\nFill the blank: "))
 
                 name = input("\nEnter the name: ")
                 task = input("\nEnter the task / question: ")
