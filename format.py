@@ -131,15 +131,14 @@ if len(unformatted_data) != 0:
                                "test\nFill the blank: "))
 
             if ok != 3:
-                while ok != 1:
-                    if ok == 3:
-                        break
+                while ok != 1 and ok != 3:
                     incorrect_number = input("Enter the question number, which is incorrect: ")
                     print_question(unformatted_test, incorrect_number, True)
                     incorrect_option = input("Enter the option:\n1 - Change question.\n2 - Change answer.\n3 - Add "
-                                             "answer\n\nLeave the field blank to go back: ")
+                                             "answer\n4 - Delete answer\n\nLeave the field blank to go back: ")
 
-                    while incorrect_option == "1" or incorrect_option == "2" or incorrect_option == "3":
+                    while (incorrect_option == "1" or incorrect_option == "2" or incorrect_option == "3"
+                           or incorrect_option == "4"):
 
                         if incorrect_option == "1":
                             question = input("Enter new question: ")
@@ -148,19 +147,26 @@ if len(unformatted_data) != 0:
                             except:
                                 unformatted_test[incorrect_number].append(question)
 
-                        elif incorrect_option == "2":
+                        elif incorrect_option == "2" or incorrect_option == "4":
                             len_answers = len(unformatted_test[incorrect_number]) - 1
                             answer_num = 1
                             if len_answers > 1:
                                 for i in range(1, len_answers + 1):
                                     print(f"{i}: {unformatted_test[incorrect_number][i]}")
-                                answer_num = int(input("Enter which answer you want to change: "))
 
-                            answer = input("Enter new answer: ")
-                            try:
-                                unformatted_test[incorrect_number][answer_num] = answer
-                            except:
-                                unformatted_test[incorrect_number].append(answer)
+                            if incorrect_option == "2":
+                                answer_num = int(input("Enter which answer you want to change: "))
+                                answer = input("Enter new answer: ")
+                                try:
+                                    unformatted_test[incorrect_number][answer_num] = answer
+                                except:
+                                    unformatted_test[incorrect_number].append(answer)
+                            elif incorrect_option == "4":
+                                answer_num = int(input("Enter which answer you want to delete: "))
+                                try:
+                                    unformatted_test[incorrect_number].pop(answer_num)
+                                except:
+                                    print(Fore.RED + "ERROR!!!" + Fore.RESET)
 
                         elif incorrect_option == "3":
                             answer = input("Enter new answer: ")
@@ -168,66 +174,67 @@ if len(unformatted_data) != 0:
 
                         print_question(unformatted_test, incorrect_number, True)
                         incorrect_option = input("Enter the option:\n1 - Change question.\n2 - Change answer.\n3 - "
-                                                 "Add answer\n\nLeave the field blank to go back: ")
+                                                 "Add answer\n4 - Delete answer\n\nLeave the field blank to go back: ")
 
                     print_test(unformatted_test)
                     ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the "
                                    "next test\n4: try to autocorrect\nFill the blank: "))
 
-                name = input("\nEnter the name: ")
-                task = input("\nEnter the task / question: ")
-                score = input("\nEnter the question score (leave blank = 1): ")
-                if score != '':
-                    score = int(score)
-                else:
-                    score = 1
+                if ok != 3:
+                    name = input("\nEnter the name: ")
+                    task = input("\nEnter the task / question: ")
+                    score = input("\nEnter the question score (leave blank = 1): ")
+                    if score != '':
+                        score = int(score)
+                    else:
+                        score = 1
 
-                for i in range(len(themes)):
-                    print(i + 1, '. ', themes[i], sep='')
+                    for i in range(len(themes)):
+                        print(i + 1, '. ', themes[i], sep='')
 
-                theme = input("Choose theme (0 - without theme): ")
-                if theme.isnumeric():
-                    theme = int(theme)
-                else:
-                    theme = 0
+                    theme = input("Choose theme (0 - without theme): ")
+                    if theme.isnumeric():
+                        theme = int(theme)
+                    else:
+                        theme = 0
 
-                formatted_test['id'] = len(tests) + 1
-                formatted_test['name'] = name
-                formatted_test['task'] = task
-                formatted_test['test'] = []
-                formatted_test['themes'] = [theme]
+                    formatted_test['id'] = len(tests) + 1
+                    formatted_test['name'] = name
+                    formatted_test['task'] = task
+                    formatted_test['test'] = []
+                    formatted_test['themes'] = [theme]
 
-                print(Fore.GREEN)
+                    print(Fore.GREEN)
 
-                for unformatted_question in unformatted_test.values():
-                    formatted_question = {}
-                    formatted_question['id'] = len(questions) + 1
-                    formatted_question['question'] = unformatted_question[0]
-                    formatted_question['theme'] = theme
-                    formatted_question['type'] = question_type
-                    formatted_question['variants'] = []
-                    formatted_question['score'] = score
-                    formatted_question['image'] = 0
-                    formatted_question['right_answers'] = []
-                    for i in range(1, len(unformatted_question)):
-                        formatted_question['right_answers'].append(unformatted_question[i])
+                    for unformatted_question in unformatted_test.values():
+                        formatted_question = {}
+                        formatted_question['id'] = len(questions) + 1
+                        formatted_question['question'] = unformatted_question[0]
+                        formatted_question['theme'] = theme
+                        formatted_question['type'] = question_type
+                        formatted_question['variants'] = []
+                        formatted_question['score'] = score
+                        formatted_question['image'] = 0
+                        formatted_question['right_answers'] = []
+                        for i in range(1, len(unformatted_question)):
+                            formatted_question['right_answers'].append(unformatted_question[i])
 
-                    questions.append(formatted_question)
-                    with open("questions.json", "r+") as update_question_list_file:
-                        update_question_list_file.write(dumps(questions))
+                        questions.append(formatted_question)
+                        with open("questions.json", "r+") as update_question_list_file:
+                            update_question_list_file.write(dumps(questions))
 
-                    formatted_test['test'].append(len(questions))
+                        formatted_test['test'].append(len(questions))
 
-                    print(f"Added new question! ID: {len(questions)}!")
+                        print(f"Added new question! ID: {len(questions)}!")
 
-                tests.append(formatted_test)
-                with open("tests.json", "r+") as update_test_list_file:
-                    update_test_list_file.write((dumps(tests)))
+                    tests.append(formatted_test)
+                    with open("tests.json", "r+") as update_test_list_file:
+                        update_test_list_file.write((dumps(tests)))
 
-                print(f"Added new test! ID: {formatted_test['id']}")
-                print(Fore.RESET)
+                    print(f"Added new test! ID: {formatted_test['id']}")
+                    print(Fore.RESET)
 
-                delete_files.add(filename)
+                    delete_files.add(filename)
 
         print('\n' + Fore.GREEN + 'SUCCESS!\n' + Fore.RESET)
 
