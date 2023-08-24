@@ -1,10 +1,10 @@
 from json import load, dumps
 from pdfquery import PDFQuery
 import os
+from colorama import Fore
 
-themes_json = open('themes.json', 'r')
-themes = load(themes_json)
-themes_json.close()
+with open("themes.json") as f:
+    themes = load(f)
 
 tests = {}
 
@@ -35,7 +35,8 @@ for file in os.scandir('files'):
 
     tests[filename] = questions
 
-f = open('unformatted_data.json', 'r+')
-f.write(dumps(tests))
-f.close()
 
+with open("unformatted_data.json", "r+") as f:
+    f.write(dumps(tests))
+
+print(Fore.MAGENTA + f"Total tests: {len(tests)}")
