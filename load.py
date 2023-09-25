@@ -47,6 +47,9 @@ for theme in theme_list:
 with open("questions.json") as f:
     question_list = load(f)
 
+insert_sql = "INSERT INTO questions (id, question, theme, type, variants, right_answers, score, image) " \
+                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+
 for question in question_list:
 
     values = (
@@ -59,9 +62,6 @@ for question in question_list:
         question['score'],
         question['image']
     )
-
-    insert_sql = "INSERT INTO questions (id, question, theme, type, variants, right_answers, score, image) " \
-                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
     # Execute the query with the values
     try:
