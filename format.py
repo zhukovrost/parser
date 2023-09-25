@@ -2,11 +2,16 @@ from json import load, dumps
 from colorama import Fore
 from os import remove
 
+
 # --------- functions ------------
 
 
+def print_error(text=''):
+    print(Fore.RED + text + Fore.RESET)
+
+
 def print_none():
-    print(Fore.RED + 'NONE!!!' + Fore.RESET)
+    print_error("NONE!!!")
 
 
 def print_question(test, number, highlight=False):
@@ -46,10 +51,18 @@ def print_question(test, number, highlight=False):
 def print_test(test):
     print("\n")
     for i in range(1, len(test) + 1):
-
         print_question(test, i)
 
     print('\n')
+
+
+def print_test_options(question_, answer_):
+    print(Fore.MAGENTA)
+    print(filename, '\n')
+    print(Fore.RESET)
+    print(f"Here is an example:\nQuestion: {question_}\nAnswer: {answer_}\n"
+          f"\nChoose the question type:\n1 - One blank field with different possible answers.\n2 - Several blank "
+          f"fields with one answer variant.\n3 - Do not include this test\n4 - Stop the program\n")
 
 
 def autocorrect(unformatted_test):
@@ -66,7 +79,8 @@ def autocorrect(unformatted_test):
                     j += 1
 
                 if j != 0:
-                    while j <= len(item[1]) and item[1][j] != ' ' and item[1][j] != '.' and item[1][j] != '!' and item[1][j] != '?' and item[1][j] != '(':
+                    while j <= len(item[1]) and item[1][j] != ' ' and item[1][j] != '.' and item[1][j] != '!' and \
+                            item[1][j] != '?' and item[1][j] != '(':
                         item_answer += item[1][j]
                         j += 1
         except:
@@ -103,13 +117,16 @@ if len(unformatted_data) != 0:
         unformatted_test = unformatted_item[1]
         formatted_test = {}
 
-        print(Fore.MAGENTA)
-        print(filename, '\n')
-        print(Fore.RESET)
-        print(f"Here is an example:\nQuestion: {unformatted_test['3'][0]}\nAnswer: {unformatted_test['3'][1]}\n"
-              f"\nChoose the question type:\n1 - One blank field with different possible answers.\n2 - Several blank "
-              f"fields with one answer variant.\n3 - Do not include this test\n4 - Stop the program\n")
-        question_type = int(input("Enter 1 or 2 or 3 or 4: "))
+        print_test_options(unformatted_test['3'][0], unformatted_test['3'][1])
+        question_type = input("Enter 1 or 2 or 3 or 4: ")
+
+        while not question_type.isnumeric() or (int(question_type) != 1 and int(question_type) != 2 and
+                                                int(question_type) != 3 and int(question_type) != 4):
+            print_error("Incorrect input. Try again:")
+            print_test_options(unformatted_test['3'][0], unformatted_test['3'][1])
+            question_type = input("Enter 1 or 2 or 3 or 4: ")
+
+        question_type = int(question_type)
 
         if question_type == 4:
             break
@@ -121,9 +138,15 @@ if len(unformatted_data) != 0:
                 question_type = "missing_words"
 
             print_test(unformatted_test)
-            ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next "
-                           "test\n4: try to autocorrect\nFill the blank: "))
+            ok = input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next "
+                       "test\n4: try to autocorrect\nFill the blank: ")
 
+            while not ok.isnumeric() or (ok != 1 and ok != 2 and ok != 3 and ok != 4):
+                print_error("Incorrect input. Try again:")
+                ok = input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next "
+                           "test\n4: try to autocorrect\nFill the blank: ")
+
+            ok = int(ok)
             if ok == 4:
                 unformatted_test = autocorrect(unformatted_test)
                 print_test(unformatted_test)
@@ -177,8 +200,16 @@ if len(unformatted_data) != 0:
                                                  "Add answer\n4 - Delete answer\n\nLeave the field blank to go back: ")
 
                     print_test(unformatted_test)
-                    ok = int(input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the "
-                                   "next test\n4: try to autocorrect\nFill the blank: "))
+                    ok = input("Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the "
+                                   "next test\n4: try to autocorrect\nFill the blank: ")
+
+                    while not ok.isnumeric() or (ok != 1 and ok != 2 and ok != 3 and ok != 4):
+                        print_error("Incorrect input. Try again:")
+                        ok = input(
+                            "Is this test correct?\n0 - no\n1 - yes\n3: discard changes and continue with the next "
+                            "test\n4: try to autocorrect\nFill the blank: ")
+
+                    ok = int(ok)
 
                 if ok != 3:
                     name = input("\nEnter the name: ")
